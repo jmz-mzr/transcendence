@@ -29,7 +29,13 @@ function EntityAvatar({
           className={`w-full h-full rounded-full ${className}`}
         />
       ) : (
-        <div className="flex justify-center items-center w-full h-full rounded-full text-purple">
+        <div
+          style={{
+            width: `${size}px`,
+            height: `${size}px`,
+          }}
+          className="flex justify-center items-center w-full h-full rounded-full text-purple"
+        >
           {acronym}
         </div>
       )}

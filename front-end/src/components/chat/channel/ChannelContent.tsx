@@ -38,12 +38,11 @@ function ChannelContent({
       { channelId, password: values.password },
       {
         onSuccess: () => {
+          toast.info(`Welcome ${me?.username}!`);
           passwordError.current = 0;
         },
         onError: (err: unknown) => {
-          // console.log({ err });
           if (isAxiosError(err) && err.response?.status === 401) {
-            // console.log(passwordError.current);
             if (++passwordError.current > 2) {
               toast.error(
                 'Are you sure you belong here? Go look somewhere else ;)'
