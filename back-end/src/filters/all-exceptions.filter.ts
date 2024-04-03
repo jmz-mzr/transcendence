@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
 import { BaseWsExceptionFilter, WsException } from '@nestjs/websockets';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
 interface IResponseBody {
   statusCode: number;

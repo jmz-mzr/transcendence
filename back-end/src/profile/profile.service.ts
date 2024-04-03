@@ -22,12 +22,8 @@ export class ProfileService {
 
     if (value === true) {
       secret = authenticator.generateSecret();
-      const otpauth = authenticator.keyuri(
-        user.email,
-        'ft_transcendence',
-        secret,
-      );
-      qrCodeDataUrl = await toDataURL(otpauth);
+      const otpAuth = authenticator.keyuri(user.email, 'transcendence', secret);
+      qrCodeDataUrl = await toDataURL(otpAuth);
     }
     await this.prisma.user.update({
       where: {
