@@ -48,9 +48,7 @@ function Layout({
           name="viewport"
           content="width=device-width, initial-scale=1, shrink-to-fit=no"
         />
-        <title>
-          {title ? `${title} - ft_transcendence` : 'ft_transcendence'}
-        </title>
+        <title>{title ? `${title} - transcendence` : 'transcendence'}</title>
       </Head>
       {mode === 'withLayout' ? (
         <div className="flex flex-row w-full">

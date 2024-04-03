@@ -14,7 +14,7 @@ function LoginContent(): ReactElement {
           hover:ring-offset-1 active:opacity-75 rounded-full text-white
           font-medium text-sm transition ease-in-out duration-200"
           >
-            Connexion
+            Connection
           </button>
         </Link>
       </div>

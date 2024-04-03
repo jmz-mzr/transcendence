@@ -10,7 +10,7 @@ import { ToastContainer } from 'react-toastify';
 
 const queryClient = new QueryClient();
 
-function ft_transcendence({ Component, pageProps }: AppProps): ReactElement {
+function transcendence({ Component, pageProps }: AppProps): ReactElement {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
@@ -37,4 +37,4 @@ function ft_transcendence({ Component, pageProps }: AppProps): ReactElement {
   );
 }
 
-export default ft_transcendence;
+export default transcendence;

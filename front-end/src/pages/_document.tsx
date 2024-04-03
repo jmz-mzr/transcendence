@@ -3,7 +3,7 @@ import { ReactElement } from 'react';
 
 export default function Document(): ReactElement {
   return (
-    <Html lang="fr">
+    <Html lang="en">
       <Head />
       <body>
         <Main />

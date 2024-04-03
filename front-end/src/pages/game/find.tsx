@@ -142,7 +142,7 @@ function FindGame(): JSX.Element {
             </button>
           ) : (
             <>
-              Waiting for you opponent...
+              Waiting for your opponent...
               <div style={{ height: '5%', display: 'hidden' }} />
               <div className={styleLoadingScreen.style__loader}></div>
             </>

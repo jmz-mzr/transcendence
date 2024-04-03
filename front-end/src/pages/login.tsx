@@ -7,7 +7,7 @@ const Login: NextPage = () => {
   return (
     <Layout
       className="flex items-center justify-center h-screen bg-dark-purple"
-      title="Connexion"
+      title="Connection"
       mode="withoutLayout"
     >
       <LoginContent />
