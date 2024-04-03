@@ -1,0 +1,84 @@
+if [ -n "$BASH_SOURCE" ]; then
+	SELF_DIR="$(dirname "${BASH_SOURCE[0]}")"
+else
+	SELF_DIR="$(dirname "$0")"
+fi
+
+PLATFORM=$(uname -s)
+case "$PLATFORM" in
+    Linux)
+        SED="sed -i" ;;
+    *)
+        SED="sed -i \"\" -e" ;;
+esac
+
+if [ ! -f "$SELF_DIR/.env" ]; then
+    cp "$SELF_DIR/.env.example" "$SELF_DIR/.env"
+fi
+
+if [ ! -f "$SELF_DIR/.env" ]; then
+    echo "The '.env' file is missing in the 'docker' directory"
+    return 1
+fi
+
+if grep -q -e "FORTYTWO_APP_ID=$" -e "FORTYTWO_APP_SECRET=$" \
+        "$SELF_DIR/.env" ; then
+    echo "You must provide the 'ID' and 'SECRET' of the FORTYTWO_APP" \
+        "in the '.env' file of the 'docker' directory"
+    return 1
+fi
+
+if grep -q -e "POSTGRES_PASSWORD=$" -e "JWT_SECRET=$" "$SELF_DIR/.env" && \
+        ! openssl -v >/dev/null 2>&1 ; then
+    echo "You must provide a value for all the secrets in the '.env' file" \
+        "of the 'docker' directory," \
+        "or install 'openssl' to create default ones"
+    return 1
+fi
+
+if grep -q 'POSTGRES_PASSWORD=$' "$SELF_DIR/.env" ; then
+    SECRET="$(openssl rand -base64 14 | sed 's/\//-/g' | sed 's/=/-/g')"
+    eval "$SED 's/POSTGRES_PASSWORD=$/&$SECRET/' \"$SELF_DIR/.env\""
+fi
+
+if grep -q 'JWT_SECRET=$' "$SELF_DIR/.env" ; then
+    SECRET="$(openssl rand -base64 32 | sed 's/\//-/g' | sed 's/=/-/g')"
+    eval "$SED 's/JWT_SECRET=$/&$SECRET/' \"$SELF_DIR/.env\""
+fi
+
+if grep -q -e 'POSTGRES_USER=$' -e 'POSTGRES_PASSWORD=$' -e 'POSTGRES_DB=$' \
+        -e 'DATABASE_URL=$' -e 'JWT_SECRET=$' -e 'FORTYTWO_APP_ID=$' \
+        -e 'FORTYTWO_APP_SECRET=$' -e 'SERVER_ADDRESS=$' \
+        -e 'FORTYTWO_CALLBACK_URL=$' -e 'FRONTEND_URL=$' \
+        -e 'BACKEND_URL=$' "$SELF_DIR/.env" ; then
+    echo "You must provide a value for all the variables in the '.env' file" \
+        "of the 'docker' directory"
+fi
+
+mkdir -p "$SELF_DIR/secrets"
+
+PG_USER=$(sed -n 's/POSTGRES_USER=//p' "$SELF_DIR/.env")
+echo "$PG_USER" > "$SELF_DIR/secrets/db_user.txt"
+
+PG_PASS=$(sed -n 's/POSTGRES_PASSWORD=//p' "$SELF_DIR/.env")
+echo "$PG_PASS" > "$SELF_DIR/secrets/db_password.txt"
+
+PG_DB=$(sed -n 's/POSTGRES_DB=//p' "$SELF_DIR/.env")
+echo "$PG_DB" > "$SELF_DIR/secrets/db_name.txt"
+
+printf "export " > "$SELF_DIR/secrets/back_env.txt"
+grep 'POSTGRES_USER=' "$SELF_DIR/.env" >> "$SELF_DIR/secrets/back_env.txt"
+printf "export " >> "$SELF_DIR/secrets/back_env.txt"
+grep 'POSTGRES_PASSWORD=' "$SELF_DIR/.env" >> "$SELF_DIR/secrets/back_env.txt"
+printf "export " >> "$SELF_DIR/secrets/back_env.txt"
+grep 'POSTGRES_DB=' "$SELF_DIR/.env" >> "$SELF_DIR/secrets/back_env.txt"
+printf "export " >> "$SELF_DIR/secrets/back_env.txt"
+grep 'DATABASE_URL=' "$SELF_DIR/.env" >> "$SELF_DIR/secrets/back_env.txt"
+printf "export " >> "$SELF_DIR/secrets/back_env.txt"
+grep 'JWT_SECRET=' "$SELF_DIR/.env" >> "$SELF_DIR/secrets/back_env.txt"
+printf "export " >> "$SELF_DIR/secrets/back_env.txt"
+grep 'FORTYTWO_APP_ID=' "$SELF_DIR/.env" >> "$SELF_DIR/secrets/back_env.txt"
+printf "export " >> "$SELF_DIR/secrets/back_env.txt"
+grep 'FORTYTWO_APP_SECRET=' "$SELF_DIR/.env" >> "$SELF_DIR/secrets/back_env.txt"
+printf "export " >> "$SELF_DIR/secrets/back_env.txt"
+grep 'FORTYTWO_CALLBACK_URL=' "$SELF_DIR/.env" >> "$SELF_DIR/secrets/back_env.txt"
