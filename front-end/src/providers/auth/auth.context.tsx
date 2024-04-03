@@ -54,7 +54,7 @@ export const useProvideAuth = (): IAuthContext => {
     deleteCookie('2FA', {
       sameSite: 'strict',
     });
-    socket?.disconnect();
+    router.push('/login').finally(() => socket?.disconnect());
   };
 
   useEffect(() => {
