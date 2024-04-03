@@ -31,7 +31,8 @@ export class AuthController {
 
   getCookieOptions(): CookieOptions {
     return {
-      secure: this.configService.get<string>('NODE_ENV') === 'production',
+      // TODO: Uncomment when deploying over https
+      // secure: this.configService.get<string>('NODE_ENV') === 'production',
       sameSite: 'strict',
       maxAge: 1000 * 60 * 60 * 24,
     };
