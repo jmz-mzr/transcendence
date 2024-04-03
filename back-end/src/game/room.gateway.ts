@@ -11,7 +11,7 @@ import {
 import { Game } from '@prisma/client';
 import { Server, Socket } from 'socket.io';
 import { GameGateway } from './game.gateway';
-import { GameState } from './types/game.types';
+import { GameState, PlayerCard } from './types/game.types';
 import { ISocketUser } from '@/socket/types/socket.types';
 
 @WebSocketGateway()
@@ -190,6 +190,7 @@ export class RoomGateway {
     | {
         asPlayer: boolean;
         isLeftPlayer: boolean;
+        players: { left: PlayerCard; right: PlayerCard };
         playersReady: boolean;
         gameStarted: boolean;
         countdown: number;
@@ -228,6 +229,11 @@ export class RoomGateway {
     if (!gameRoom)
       return { event: 'gameError', data: "This room doesn't exist" };
 
+    const players = await this.roomService.getPlayerCards(gameInDB);
+
+    if (!players)
+      return { event: 'gameError', data: "This room doesn't exist" };
+
     let playersReady = false;
     let gameStarted = false;
     let countdown = 5;
@@ -252,6 +258,7 @@ export class RoomGateway {
       return {
         asPlayer: true,
         isLeftPlayer: true,
+        players,
         playersReady,
         gameStarted,
         countdown,
@@ -260,6 +267,7 @@ export class RoomGateway {
       return {
         asPlayer: true,
         isLeftPlayer: false,
+        players,
         playersReady,
         gameStarted,
         countdown,
@@ -267,6 +275,7 @@ export class RoomGateway {
     return {
       asPlayer: false,
       isLeftPlayer: false,
+      players,
       playersReady,
       gameStarted,
       countdown,
@@ -276,7 +285,7 @@ export class RoomGateway {
   @SubscribeMessage('joinLocalGame')
   async onJoinLocalGame(
     @ConnectedSocket() client: Socket,
-  ): Promise<number | WsResponse<string>> {
+  ): Promise<{ id: number; playerCard: PlayerCard } | WsResponse<string>> {
     // TODO:
     // Create UUID for local game
     // Add client to room
@@ -310,7 +319,14 @@ export class RoomGateway {
     if (gameRoom.game.status === GameState.WAITING) {
       await this.gameGateway.startGame(gameRoom.game, true);
     }
-    return gameId;
+    return {
+      id: gameId,
+      playerCard: {
+        id: user.id,
+        username: user.username,
+        profilePicture: user.profilePicture,
+      },
+    };
   }
 
   // TODO:

@@ -7,6 +7,8 @@ export type Player = Pick<User, 'id' | 'elo'> & {
   searchGameSince: number;
 };
 
+export type PlayerCard = Pick<User, 'id' | 'username' | 'profilePicture'>;
+
 export interface IFindGame {
   error?: string;
   players?: Player[];

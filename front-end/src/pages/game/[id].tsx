@@ -1,6 +1,8 @@
 import Layout from '@/components/app/layouts/Layout';
+import { GamePlayers } from '@/components/game/GamePlayers';
 import { GameResult } from '@/components/game/GameResult';
 import Pong from '@/components/game/Pong';
+import { PlayerCard } from '@/components/game/types/game.type';
 import Countdown from '@/components/utils/Countdown';
 import { Keyframes } from '@/components/utils/Keyframes';
 import useColors from '@/hooks/useColors';
@@ -25,12 +27,12 @@ const Game: NextPage = () => {
 
   const [isPlayer, setIsPlayer] = useState<boolean>(false);
   const [isLeftPlayer, setIsLeftPlayer] = useState<boolean>(false);
-  const [startGame, setStartGame] = useState<boolean>(false);
-  const [winner, setWinner] = useState<{
-    id: number;
-    username: string;
-    profilePicture: string;
+  const [playerCards, setPlayerCards] = useState<{
+    left: PlayerCard;
+    right: PlayerCard;
   } | null>(null);
+  const [startGame, setStartGame] = useState<boolean>(false);
+  const [winner, setWinner] = useState<PlayerCard | null>(null);
 
   useEffect(() => {
     if (count <= 0) {
@@ -51,6 +53,7 @@ const Game: NextPage = () => {
         (ack: {
           asPlayer: boolean;
           isLeftPlayer: boolean;
+          players: { left: PlayerCard; right: PlayerCard };
           playersReady: boolean;
           gameStarted: boolean;
           countdown: number;
@@ -59,6 +62,7 @@ const Game: NextPage = () => {
           else if (!ack.asPlayer) setIsPlayer(false);
           if (ack.isLeftPlayer) setIsLeftPlayer(true);
           else if (!ack.isLeftPlayer) setIsLeftPlayer(false);
+          setPlayerCards(ack.players);
           if (ack.playersReady) setTimeout(() => startCountdown(), 100);
           if (ack.gameStarted || (!ack.asPlayer && ack.countdown < 2))
             setStartGame(true);
@@ -171,6 +175,7 @@ const Game: NextPage = () => {
   return (
     <Layout title="Game">
       <div className={gameStyles.ctn__main__game}>
+        {playerCards && <GamePlayers players={playerCards} />}
         <div className={gameStyles.ctn__game}>
           <div className={gameStyles.ctn__canvas}>
             <Keyframes

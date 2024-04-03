@@ -5,6 +5,7 @@ import {
   IFindGame,
   Paddle,
   Player,
+  PlayerCard,
 } from '@/game/types/game.types';
 import { PrismaService } from '@/prisma/prisma.service';
 import { ProfileService } from '@/profile/profile.service';
@@ -33,6 +34,34 @@ export class RoomService {
         id: gameId,
       },
     });
+  }
+
+  async getPlayerCards(
+    game: Game,
+  ): Promise<{ left: PlayerCard; right: PlayerCard } | null> {
+    const left = await this.prisma.user.findUnique({
+      where: {
+        id: game.playerOneId,
+      },
+      select: {
+        id: true,
+        username: true,
+        profilePicture: true,
+      },
+    });
+    if (!left) return null;
+    const right = await this.prisma.user.findUnique({
+      where: {
+        id: game.playerTwoId,
+      },
+      select: {
+        id: true,
+        username: true,
+        profilePicture: true,
+      },
+    });
+    if (!right) return null;
+    return { left, right };
   }
 
   async getOrCreateGame(

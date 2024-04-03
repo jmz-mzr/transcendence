@@ -1,6 +1,8 @@
 import Layout from '@/components/app/layouts/Layout';
+import { GamePlayers } from '@/components/game/GamePlayers';
 import { GameResult } from '@/components/game/GameResult';
 import Pong from '@/components/game/Pong';
+import { PlayerCard } from '@/components/game/types/game.type';
 import Countdown from '@/components/utils/Countdown';
 import { Keyframes } from '@/components/utils/Keyframes';
 import useColors from '@/hooks/useColors';
@@ -23,12 +25,9 @@ const Game: NextPage = () => {
   const router = useRouter();
 
   const [gameId, setGameId] = useState<number>(-1);
+  const [playerCard, setPlayerCard] = useState<PlayerCard | null>(null);
   const [startGame, setStartGame] = useState<boolean>(false);
-  const [winner, setWinner] = useState<{
-    id: number;
-    username: string;
-    profilePicture: string;
-  } | null>(null);
+  const [winner, setWinner] = useState<PlayerCard | null>(null);
 
   useEffect(() => {
     if (count === 0) {
@@ -38,9 +37,13 @@ const Game: NextPage = () => {
 
   useEffect(() => {
     const sendJoinGame = (): void => {
-      socket?.volatile.emit('joinLocalGame', (id: number) => {
-        setGameId(id);
-      });
+      socket?.volatile.emit(
+        'joinLocalGame',
+        (ack: { id: number; playerCard: PlayerCard }) => {
+          setGameId(ack.id);
+          setPlayerCard(ack.playerCard);
+        }
+      );
     };
     const timer1 = setTimeout(sendJoinGame, 100);
 
@@ -132,6 +135,9 @@ const Game: NextPage = () => {
   return (
     <Layout title="Game">
       <div className={gameStyles.ctn__main__game}>
+        {playerCard && (
+          <GamePlayers players={{ left: playerCard, right: playerCard }} />
+        )}
         <div className={gameStyles.ctn__game}>
           <div className={gameStyles.ctn__canvas}>
             <Keyframes
