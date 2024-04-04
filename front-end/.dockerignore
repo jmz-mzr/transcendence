@@ -1,1 +1,29 @@
+# OS files
+.DS_Store
+
+# Config & Env files
+.env*
+.vscode
+
+# Git files
+.git
+.gitignore
+
+# Docker files
+.dockerignore
+Docker*
+docker*
+
+# Production files
 node_modules
+
+# Next.js files
+.next
+
+# Husky & Lint-Staged files
+.husky
+.lint*staged*
+
+# Misc
+Makefile
+*.md

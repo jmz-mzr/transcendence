@@ -1,0 +1,50 @@
+name: transcendence_dev
+
+services:
+  api-node:
+    extends:
+      file: docker-compose.yml
+      service: api-node
+    container_name: api-node_dev
+    build:
+      target: dev
+    ports:
+      - "5555:5555"
+    volumes:
+      - ../back-end/src:/app/src
+      - ../back-end/prisma:/app/prisma
+
+  web-node:
+    extends:
+      file: docker-compose.yml
+      service: web-node
+    container_name: web-node_dev
+    build:
+      target: dev
+    environment:
+      NEXT_PUBLIC_BACKEND_URL: ${BACKEND_URL?}
+    volumes:
+      - ../front-end/src:/app/src
+
+  postgres:
+    extends:
+      file: docker-compose.yml
+      service: postgres
+    container_name: postgres_dev
+
+volumes:
+  db-data:
+
+secrets:
+  db-name:
+    file: secrets/db_name.txt
+  db-user:
+    file: secrets/db_user.txt
+  db-password:
+    file: secrets/db_password.txt
+  back-env:
+    file: secrets/back_env.txt
+
+networks:
+  my_network:
+    driver: bridge

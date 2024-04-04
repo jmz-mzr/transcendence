@@ -1,0 +1,105 @@
+name: transcendence_prod
+
+services:
+  api-node:
+    container_name: api-node
+    build:
+      context: ../back-end
+      additional_contexts:
+        resources: ../docker/services/api-node/
+      dockerfile: ../docker/services/api-node/Dockerfile
+      target: prod
+    expose:
+      - 3000
+    ports:
+      - "3000:3000"
+    environment:
+      FRONTEND_URL: ${FRONTEND_URL?}
+      BACKEND_URL: ${BACKEND_URL?}
+    secrets:
+      - back-env
+    networks:
+      my_network:
+        aliases:
+          - back_hostname
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  web-node:
+    container_name: web-node
+    build:
+      context: ../front-end
+      additional_contexts:
+        resources: ../docker/services/web-node
+      dockerfile: ../docker/services/web-node/Dockerfile
+      args:
+        - NEXT_PUBLIC_BACKEND_URL=${BACKEND_URL?}
+      target: prod
+    expose:
+      - 4000
+    ports:
+      - "4000:4000"
+    environment:
+      FRONTEND_URL: ${FRONTEND_URL?}
+      BACKEND_URL: ${BACKEND_URL?}
+    networks:
+      my_network:
+        aliases:
+          - front_hostname
+    restart: unless-stopped
+    depends_on:
+      - api-node
+
+  postgres:
+    container_name: postgres
+    image: postgres:13-alpine
+    expose:
+      - 5432
+    ## NOTE: Uncomment the ports if you want to access the database
+    ## directly from the host, preferably from a specific IP address
+    # ports:
+    #   - "127.0.0.1:5432:5432"
+    environment:
+      POSTGRES_DB_FILE: /run/secrets/db-name
+      POSTGRES_USER_FILE: /run/secrets/db-user
+      POSTGRES_PASSWORD_FILE: /run/secrets/db-password
+    ## SECURITY NOTE: Once the database is initialized, you can safely
+    ## comment the secrets to prevent mounting them in the container
+    secrets:
+      - db-name
+      - db-user
+      - db-password
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      my_network:
+        aliases:
+          - db_hostname
+    restart: unless-stopped
+    user: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h $$(hostname -i)"]
+      start_period: 30s
+      # start_interval: 5s
+      interval: 5s
+      timeout: 10s
+      retries: 5
+
+volumes:
+  db-data:
+
+secrets:
+  db-name:
+    file: secrets/db_name.txt
+  db-user:
+    file: secrets/db_user.txt
+  db-password:
+    file: secrets/db_password.txt
+  back-env:
+    file: secrets/back_env.txt
+
+networks:
+  my_network:
+    driver: bridge

@@ -1,1 +1,31 @@
-node_modules/
+# OS files
+**/.DS_Store
+
+# Config & Env files
+.env*
+.vscode
+.eslint*
+.prettier*
+
+# Git files
+.git
+.gitignore
+
+# Docker files
+.dockerignore
+Docker*
+docker*
+
+# Test files
+test
+
+# Production files
+node_modules
+
+# Husky & Lint-Staged files
+.husky
+.lint*staged*
+
+# Misc
+Makefile
+*.md

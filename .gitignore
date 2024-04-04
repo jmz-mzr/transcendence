@@ -1,4 +1,4 @@
-# compiled output
+# Compiled output
 /dist
 /node_modules
 
@@ -14,9 +14,12 @@ lerna-debug.log*
 # OS
 .DS_Store
 
+# Env and secrets
+.env
+
 # Docker
-docker/prod/volumes/db-data/*
-docker/dev/volumes/db-data/*
+docker/volumes/*
+docker/secrets/*
 
 # Tests
 /coverage
@@ -37,9 +40,3 @@ docker/dev/volumes/db-data/*
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
-
-# NPM
-*package-lock.json
-
-# Yarn
-*yarn.lock
