@@ -17,6 +17,7 @@
     "strictNullChecks": true,
     "noImplicitAny": true,
     "noImplicitReturns": true,
+    // "noUncheckedIndexedAccess": true,
     "paths": {
       "@/*": ["./src/*"],
       "@public/*": ["./public/*"],
