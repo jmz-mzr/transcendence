@@ -25,26 +25,6 @@ RUN \
 
 
 
-FROM base AS dev
-
-RUN apk add --no-cache dumb-init \
-  && mkdir .next \
-	&& chown nextjs:nodejs .next
-
-COPY --from=deps --chown=nextjs:nodejs /app/node_modules ./node_modules
-COPY --chown=nextjs:nodejs . ./
-
-ENV NODE_ENV=development
-ENV BACKEND_URL=${BACKEND_URL}
-ENV NEXT_PUBLIC_BACKEND_URL=${BACKEND_URL}
-ENV PATH=/app/node_modules/.bin:$PATH
-
-USER nextjs:nodejs
-
-CMD ["dumb-init", "next", "dev", "--port", "4000"]
-
-
-
 FROM base AS build
 
 COPY --from=deps --chown=nextjs:nodejs /app/node_modules ./node_modules
@@ -60,6 +40,27 @@ RUN \
   else echo "Lockfile not found." && exit 1; \
   fi \
   && rm -fr node_modules
+
+
+
+FROM base AS dev
+
+RUN apk add --no-cache dumb-init \
+  && mkdir .next \
+	&& chown nextjs:nodejs .next
+
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules ./node_modules
+COPY --from=build --chown=nextjs:nodejs /app/next-env.d.ts ./
+COPY --chown=nextjs:nodejs . ./
+
+ENV NODE_ENV=development
+ENV BACKEND_URL=${BACKEND_URL}
+ENV NEXT_PUBLIC_BACKEND_URL=${BACKEND_URL}
+ENV PATH=/app/node_modules/.bin:$PATH
+
+USER nextjs:nodejs
+
+CMD ["dumb-init", "next", "dev", "--port", "4000"]
 
 
 
