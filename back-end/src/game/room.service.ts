@@ -24,7 +24,6 @@ export class RoomService {
   ) {}
 
   private playerQueue: Player[] = [];
-  // private mutex = new Mutex();
   private rooms: { [id: number]: GameRoom } = {};
 
   async getGame(gameId: number): Promise<Game | null> {
@@ -166,7 +165,6 @@ export class RoomService {
 
     if (!user) return;
 
-    // const release = await RoomService.mutex.acquire();
     const clientIndex = this.playerQueue.findIndex(
       (player) => player.id === user.id,
     );
@@ -175,7 +173,6 @@ export class RoomService {
       this.playerQueue.splice(clientIndex, 1);
     }
     // console.log(this.playerQueue);
-    // release();
   }
 
   addToPlayerQueue(@ConnectedSocket() client: Socket): void {
@@ -183,7 +180,6 @@ export class RoomService {
 
     if (!user) return;
     if (!this.playerQueue.find((player) => player.id === user.id)) {
-      // const release = await RoomService.mutex.acquire();
       this.playerQueue.push({
         id: user.id,
         socketId: client.id,
@@ -191,7 +187,6 @@ export class RoomService {
         searchGameSince: Date.now(),
       });
       this.playerQueue.sort((a, b) => a.elo - b.elo);
-      // release();
     }
   }
 
@@ -206,7 +201,6 @@ export class RoomService {
 
     return new Promise<void | IFindGame>((resolve) => {
       const findMatchingPlayer = async (): Promise<void> => {
-        // const release = await RoomService.mutex.acquire();
         const resolveMatchingPlayers = (
           playerOne: Player,
           playerOneIndex: number,
@@ -215,78 +209,70 @@ export class RoomService {
         ): void => {
           this.playerQueue.splice(Math.min(playerOneIndex, playerTwoIndex), 2);
           this.playerQueue.splice(0, 1);
-          // console.log({ playerOne });
-          // console.log({ playerTwo });
           return resolve({ players: [playerOne, playerTwo] });
         };
 
-        try {
-          const userIndex = this.playerQueue.findIndex(
-            (player) => player.id === user.id,
-          );
-          const user_: Player = this.playerQueue[userIndex];
-          const userBelow: Player = this.playerQueue[userIndex - 1];
-          const userAbove: Player = this.playerQueue[userIndex + 1];
-          const userBelowEloDiff: number =
-            userBelow && user_ ? user_.elo - userBelow.elo : 1000000000;
-          const userAboveEloDiff: number =
-            userAbove && user_ ? userAbove.elo - user_.elo : 1000000000;
-          const userBelowMsWait: number =
-            userBelow && user_
-              ? Math.abs(Date.now() - userBelow.searchGameSince)
-              : -1;
-          const userAboveMsWait: number =
-            userAbove && user_
-              ? Math.abs(Date.now() - userAbove.searchGameSince)
-              : -1;
-          const maxMsWait = 15000;
+        const userIndex = this.playerQueue.findIndex(
+          (player) => player.id === user.id,
+        );
+        const user_: Player = this.playerQueue[userIndex];
+        const userBelow: Player = this.playerQueue[userIndex - 1];
+        const userAbove: Player = this.playerQueue[userIndex + 1];
+        const userBelowEloDiff: number =
+          userBelow && user_ ? user_.elo - userBelow.elo : 1000000000;
+        const userAboveEloDiff: number =
+          userAbove && user_ ? userAbove.elo - user_.elo : 1000000000;
+        const userBelowMsWait: number =
+          userBelow && user_
+            ? Math.abs(Date.now() - userBelow.searchGameSince)
+            : -1;
+        const userAboveMsWait: number =
+          userAbove && user_
+            ? Math.abs(Date.now() - userAbove.searchGameSince)
+            : -1;
+        const maxMsWait = 15000;
 
-          if (userIndex === -1) return resolve();
-          if (!userBelow && !userAbove) {
-            setTimeout(findMatchingPlayer, 3000);
-            return;
-          }
-          if (userBelow && !userAbove) {
-            if (userBelowEloDiff <= 100 || userBelowMsWait > maxMsWait)
-              return resolveMatchingPlayers(
-                user_,
-                userIndex,
-                userBelow,
-                userIndex - 1,
-              );
-          }
-          if (!userBelow && userAbove) {
-            if (userAboveEloDiff <= 100 || userAboveMsWait > maxMsWait)
-              return resolveMatchingPlayers(
-                user_,
-                userIndex,
-                userAbove,
-                userIndex + 1,
-              );
-          }
-          if (userBelowEloDiff <= 100 || userAboveEloDiff <= 100) {
+        if (userIndex === -1) return resolve();
+        if (!userBelow && !userAbove) {
+          setTimeout(findMatchingPlayer, 3000);
+          return;
+        }
+        if (userBelow && !userAbove) {
+          if (userBelowEloDiff <= 100 || userBelowMsWait > maxMsWait)
             return resolveMatchingPlayers(
               user_,
               userIndex,
-              userBelowEloDiff < userAboveEloDiff ? userBelow : userAbove,
-              userBelowEloDiff < userAboveEloDiff
-                ? userIndex - 1
-                : userIndex + 1,
+              userBelow,
+              userIndex - 1,
             );
-          }
-          if (userBelowMsWait > maxMsWait || userAboveMsWait > maxMsWait) {
+        }
+        if (!userBelow && userAbove) {
+          if (userAboveEloDiff <= 100 || userAboveMsWait > maxMsWait)
             return resolveMatchingPlayers(
               user_,
               userIndex,
-              userBelowMsWait > userAboveMsWait ? userBelow : userAbove,
-              userBelowMsWait > userAboveMsWait ? userIndex - 1 : userIndex + 1,
+              userAbove,
+              userIndex + 1,
             );
-          } else {
-            setTimeout(findMatchingPlayer, 3000);
-            return;
-          }
-        } finally {
-          // if (RoomService.mutex.isLocked()) release();
+        }
+        if (userBelowEloDiff <= 100 || userAboveEloDiff <= 100) {
+          return resolveMatchingPlayers(
+            user_,
+            userIndex,
+            userBelowEloDiff < userAboveEloDiff ? userBelow : userAbove,
+            userBelowEloDiff < userAboveEloDiff ? userIndex - 1 : userIndex + 1,
+          );
+        }
+        if (userBelowMsWait > maxMsWait || userAboveMsWait > maxMsWait) {
+          return resolveMatchingPlayers(
+            user_,
+            userIndex,
+            userBelowMsWait > userAboveMsWait ? userBelow : userAbove,
+            userBelowMsWait > userAboveMsWait ? userIndex - 1 : userIndex + 1,
+          );
+        } else {
+          setTimeout(findMatchingPlayer, 3000);
+          return;
         }
       };
 
