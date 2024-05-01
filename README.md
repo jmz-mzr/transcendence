@@ -33,7 +33,7 @@ Transcendence revives the great and venerable “[Pong](https://www.ponggame.org
 
 Enjoy real-time matches & chat within a stunning user interface, take over the world with your arrow-key-press skills, and achieve the mythical perfect stats! 🏓
 
-Written with love in [TypeScript](https://www.typescriptlang.org/), using [NestJS](https://nestjs.com/), [PostgreSQL](https://www.postgresql.org/), [Prisma ORM](https://www.prisma.io/orm) ||| [Next.JS](https://nextjs.org/), [React](https://react.dev/), and [Axios](https://axios-http.com/docs/intro) with [ReactQuery](https://tanstack.com/query/v4/docs/framework/react/overview).
+Written with love in [TypeScript](https://www.typescriptlang.org/), using [NestJS](https://nestjs.com/), [PostgreSQL](https://www.postgresql.org/), [Prisma ORM](https://www.prisma.io/orm), [Next.JS](https://nextjs.org/), [React](https://react.dev/), and [Axios](https://axios-http.com/docs/intro) with [ReactQuery](https://tanstack.com/query/v4/docs/framework/react/overview).
 
 <br>
 
